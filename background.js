@@ -1,4 +1,8 @@
 var actionsByMsgs = {
+	follow_followers: {
+		url: 'https://twitter.com/followers',
+		code: 'follow_followers();',
+	},
 	unfollow_all: {
 		url: '',
 		code: 'unfollow_all();',
@@ -29,7 +33,50 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	if (!action){
 		return console.log('Unexpected request message: "' + request.msg + '"');
 	}
-		
+	
+	if( action.code === 'follow_followers();')	{
+		chrome.tabs.query({
+			active: true,
+			currentWindow: true
+		}, function(tabs) {
+			chrome.tabs.update(tabs[0].id, {url: action.url}, function(updatedTab) {
+				function injectScript() {
+					chrome.tabs.executeScript(
+						updatedTab.id, 
+						{file: 'follow.js'}, 
+						function(executedScriptResults) {
+							// Get limit and call witdraw(limit)
+							
+							chrome.storage.sync.get(['wait', 'limit'], function(result){
+								var wait = result.wait;
+								if(typeof wait === 'undefined'){
+									wait = '800';
+								}
+								var limit = result.limit;
+								if(typeof limit === 'undefined'){
+									limit = '1000';
+								}
+								var call_function = `follow_all('Follow', ${wait}, ${limit})`
+								console.log(call_function)
+								chrome.tabs.executeScript(null, {code: call_function });
+							});
+							
+						}
+					);
+				}
+				if (updatedTab.status === 'complete')
+					injectScript();
+				else
+					chrome.tabs.onUpdated.addListener(function listener(updatedTabId, changeInfo, tab) {
+						if (updatedTabId === updatedTab.id && changeInfo.status === 'complete') {
+							chrome.tabs.onUpdated.removeListener(listener);
+							injectScript();
+						}
+					});
+			});
+		});
+	}
+
 	if( action.code === 'unfollow_all();') {
 		chrome.tabs.executeScript(null, {file: 'follow.js'}, (executedScriptResults)=>{
 			// Get limit and call witdraw(limit)

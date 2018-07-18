@@ -87,8 +87,8 @@
   }
 
   window.follow_all = function (follow, wait, limit) {
-    let accounts_interacted_with = 0
-    let forma_welcome_text = `<p>Start applying action on this page? Note: There is delay of ${wait}ms between action.</p>`
+    
+    let forma_welcome_text = `<p>Start applying action on this page? Note: There is delay of ${wait}ms between action, and has a limit of ${limit} number of actions.</p>`
     var forma = new OurForm(forma_welcome_text)
     forma.show()
     forma.onStart = function(){
@@ -112,7 +112,7 @@
       var current_profile_num = 0
 
       function profiler_fun() {
-        if (current_profile_num < end_profile_num) {
+        if (current_profile_num < end_profile_num && current_profile_num < limit) {
 
           var profile = document
                           .getElementsByClassName('ProfileCard-content')[current_profile_num]
