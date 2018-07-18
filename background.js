@@ -1,5 +1,12 @@
 var actionsByMsgs = {
-	
+	unfollow_all: {
+		url: '',
+		code: 'unfollow_all();',
+	},
+	follow_all: {
+		url: '',
+		code: 'follow_all();',
+	},
 	like_all: {
 		url: '',
 		code: 'like_all();',
@@ -19,9 +26,49 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 		return;
 
 	var action = actionsByMsgs[request.msg];
-	if (!action)
+	if (!action){
 		return console.log('Unexpected request message: "' + request.msg + '"');
-	
+	}
+		
+	if( action.code === 'unfollow_all();') {
+		chrome.tabs.executeScript(null, {file: 'follow.js'}, (executedScriptResults)=>{
+			// Get limit and call witdraw(limit)
+			chrome.storage.sync.get(['wait', 'limit'], function(result){
+				var wait = result.wait;
+				if(typeof wait === 'undefined'){
+					wait = '800';
+				}
+				var limit = result.limit;
+				if(typeof limit === 'undefined'){
+					limit = '1000';
+				}
+				var call_function = `follow_all('Following', ${wait}, ${limit})`
+				console.log(call_function)
+				chrome.tabs.executeScript(null, {code: call_function });
+			});
+		})
+		return
+	}	
+	if( action.code === 'follow_all();') {
+		chrome.tabs.executeScript(null, {file: 'follow.js'}, (executedScriptResults)=>{
+			// Get limit and call witdraw(limit)
+			chrome.storage.sync.get(['wait', 'limit'], function(result){
+				var wait = result.wait;
+				if(typeof wait === 'undefined'){
+					wait = '800';
+				}
+				var limit = result.limit;
+				if(typeof limit === 'undefined'){
+					limit = '1000';
+				}
+				var call_function = `follow_all('Follow', ${wait}, ${limit})`
+				console.log(call_function)
+				chrome.tabs.executeScript(null, {code: call_function });
+			});
+		})
+		return
+	}	
+
 	if( action.code === 'like_all();') {
 		chrome.tabs.executeScript(null, {file: 'follow.js'}, (executedScriptResults)=>{
 			// Get limit and call witdraw(limit)
