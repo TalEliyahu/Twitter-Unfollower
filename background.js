@@ -96,6 +96,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 		})
 		return
 	}	
+	
 	if( action.code === 'follow_all();') {
 		chrome.tabs.executeScript(null, {file: 'follow.js'}, (executedScriptResults)=>{
 			// Get limit and call witdraw(limit)
@@ -166,15 +167,19 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 						{file: 'unfollow.js'}, 
 						function(executedScriptResults) {
 							// Get limit and call witdraw(limit)
-							chrome.storage.sync.get(['wait'], function(result){
+							
+							chrome.storage.sync.get(['wait', 'limit'], function(result){
 								var wait = result.wait;
 								if(typeof wait === 'undefined'){
 									wait = '800';
 								}
-								var call_function = `withdraw(${wait})`
+								var limit = result.limit;
+								if(typeof limit === 'undefined'){
+									limit = '1000';
+								}
+								var call_function = `withdraw(${wait}, ${limit})`
 								chrome.tabs.executeScript(updatedTab.id, {code: call_function });
 							});
-							
 						}
 					);
 				}
